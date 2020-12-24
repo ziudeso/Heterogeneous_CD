@@ -180,6 +180,8 @@ def decorated_gaussian_filter(static_name, pre_process=histogram_equalization):
 if __name__ == "__main__":
     import skimage.filters
     import numpy as np
+    import matplotlib
+    matplotlib.use('TkAgg')
     import matplotlib.pyplot as plt
 
     image = np.concatenate(

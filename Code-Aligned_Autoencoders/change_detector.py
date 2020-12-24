@@ -12,6 +12,8 @@ from config import get_config
 import datasets
 import numpy as np
 from sklearn.metrics import roc_curve, auc
+import matplotlib
+matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 from pdb import set_trace as bp
 
