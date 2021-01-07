@@ -151,6 +151,7 @@ def _texas(clip=True):
 
     t1 = np.array(mat["t1_L5"], dtype=np.single)
     t2 = np.array(mat["t2_ALI"], dtype=np.single)
+    print("texas:", t1.shape, t2.shape)
     if clip:
         print("clipping")
         t1, t2 = _clip(t1), _clip(t2)
@@ -322,7 +323,7 @@ def fetch_CGAN(name, **kwargs):
     return dataset[0], dataset[1], evaluation_data, (chs[0], chs[1]), tot_patches
 
 
-def fetch(name, patch_size=100, **kwargs):
+def fetch(name, patch_size=100, dim=-1, crop_image=True, **kwargs):
     """
         Input:
             name - dataset name, should be in DATASETS
@@ -335,17 +336,32 @@ def fetch(name, patch_size=100, **kwargs):
                               shapes (1, h, w, ?)
             channels - tuple (c_x, c_y), number of channels for domains x and y
     """
+    print('fetch')
+    # also get the change map
     x_im, y_im, target_cm = DATASETS[name](prepare_data[name])
 
-    if not tf.config.list_physical_devices("GPU"):
-        dataset = [
-            tf.image.central_crop(tensor, 0.1) for tensor in [x_im, y_im, target_cm]
-        ]
+
+    if (dim >= 0):
+      print("Picking dim", dim)
+      x_im = x_im[:,:,dim]
+      x_im = tf.expand_dims(x_im, -1)
+      y_im = y_im[:,:,dim]
+      y_im = tf.expand_dims(y_im, -1)
+    
+
+    print("Loading dataset.. x,y,changemap", x_im.shape, y_im.shape, target_cm.shape)
+
+    # if cpu crop the 10% of the image (central cropping)
+    if tf.config.list_physical_devices("GPU") or not crop_image:
+      dataset = [x_im, y_im, target_cm]
     else:
-        dataset = [x_im, y_im, target_cm]
+      dataset = [tf.image.central_crop(tensor, 0.1) for tensor in [x_im, y_im, target_cm]]
+        
 
     dataset = [tf.expand_dims(tensor, 0) for tensor in dataset]
     x, y = dataset[0], dataset[1]
+
+    print("dataset:", tf.reduce_min(x), tf.reduce_max(y), )
     evaluation_data = tf.data.Dataset.from_tensor_slices(tuple(dataset))
 
     c_x, c_y = x_im.shape[-1], y_im.shape[-1]

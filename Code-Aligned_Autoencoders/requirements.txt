@@ -1,0 +1,9 @@
+tensorflow==2.4
+numpy
+tqdm
+scikit-learn
+matplotlib
+scipy
+tensorflow_addons
+pydensecrf
+Pillow

@@ -146,6 +146,7 @@ class SCCN(ChangeDetector):
         for epoch in trange(preepochs):
             for i, batch in zip(range(batches), training_dataset.batch(batch_size)):
                 x, y, _ = batch
+                # print("pretrain, x, y, batch", x.shape, y.shape, i)
                 with tf.GradientTape() as tape:
                     x_tilde, y_tilde = self([x, y], training=True, pretraining=True)
                     recon_x_loss = self.loss_object(x, x_tilde)
